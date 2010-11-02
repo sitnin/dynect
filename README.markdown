@@ -11,12 +11,12 @@ This module encapsulates Dynect Platform REST API calls.
 
 ## Usage example
 
-``#!/usr/bin/env python
-from dynect import Dynect
-from pprint import pprint
-dyn = Dynect("customer", "username", "**************")
-dyn.keepalive()
-pprint(dyn.read_rec_a("domain.tld", "domain.tld"))``
+``#!/usr/bin/env python``
+``from dynect import Dynect``
+``from pprint import pprint``
+``dyn = Dynect("customer", "username", "**************")``
+``dyn.keepalive()``
+``pprint(dyn.read_rec_a("domain.tld", "domain.tld"))``
 
 ## Contacts
 
