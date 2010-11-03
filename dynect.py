@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Dynect Platform REST API Client
+Dynect Platform API Client
 
 This module encapsulates Dynect Platform REST API calls.
+
+Also it can be used as a command line tool
 
 Currently implemented:
     * Token authentication and logout
@@ -32,7 +34,8 @@ __version__ = "0.1"
 import httplib
 import urllib
 import json
-import pprint
+from pprint import pprint
+from optparse import OptionParser
 
 DynectException = Exception
 
@@ -140,3 +143,89 @@ class Dynect(object):
             raise DynectException(data)
         else:
             return data
+
+
+class DynTool(object):
+    def __init__(self):
+        parser = OptionParser(usage="\n%prog [options] ARGS\n%prog --version\n%prog --help", version="%prog v0.1")
+        parser.add_option("-c", "--customer", dest="customer", help="Dynect customer name")
+        parser.add_option("-u", "--username", dest="user", help="Dynect user name")
+        parser.add_option("-p", "--password", dest="password", help="Dynect user password")
+        parser.add_option("-z", "--zone", dest="zone", help="Dynect zone name (example: domain.tld)")
+        parser.add_option("-n", "--node", dest="fqdn", help="Node name (example: node.domain.tld)")
+        parser.add_option("-o", "--object", dest="object", help="Object type")
+        parser.add_option("-w", "--command", dest="command", help="Command name")
+        parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+        (options, args) = parser.parse_args()
+        if not options.customer: parser.error("Customer name must be set")
+        if not options.user: parser.error("User name must be set")
+        if not options.password: parser.error("Password name must be set")
+        if not options.zone: parser.error("Zone must be set")
+        self.options = options
+        self.object = options.object.lower()
+        self.command = options.command.lower()
+        self.arguments = args
+    
+    def set_connection(self, conn):
+        self.conn = conn
+
+    def list_a(self, zone, fqdn):
+        result = list()
+        qres = self.conn.read_rec_a(tool.options.zone, tool.options.fqdn)
+        if qres["status"] != "success":
+            raise Exception(res["msgs"][0]["INFO"])
+        if len(qres["data"]) > 0:
+            for rec in qres["data"]:
+                rec_val = rec.split("/")[5]
+                res = self.conn.read_rec_a(tool.options.zone, tool.options.fqdn, rec_val)
+                result.append((rec_val, res["data"]["rdata"]["address"]))
+        return result
+
+    def add_a(self, zone, fqdn, val):
+        qres = self.conn.create_rec_a(tool.options.zone, tool.options.fqdn, val)
+        if qres["status"] != "success":
+            raise Exception(res["msgs"][0]["INFO"])
+        qres = self.conn.publish_zone(tool.options.zone)
+        if qres["status"] != "success":
+            raise Exception(res["msgs"][0]["INFO"])
+        return True
+
+    def del_a(self, zone, fqdn, val):
+        rec_id = None
+        for rec in self.list_a(tool.options.zone, tool.options.fqdn):
+            if rec[1] == val:
+                rec_id = rec[0]
+        if not rec_id:
+            raise DynectException("Can't find record %s"%val)
+        qres = self.conn.delete_rec_a(tool.options.zone, tool.options.fqdn, rec_id)
+        if qres["status"] != "success":
+            raise DynectException(res["msgs"][0]["INFO"])
+        qres = self.conn.publish_zone(tool.options.zone)
+        if qres["status"] != "success":
+            raise DynectException(res["msgs"][0]["INFO"])
+        return True
+
+
+if __name__ == "__main__":
+    tool = DynTool()
+    dyn = Dynect(tool.options.customer, tool.options.user, tool.options.password)
+    tool.set_connection(dyn)
+    try:
+        dyn.keepalive()
+        if (tool.object == "a") and (tool.command == "list"):
+            res = tool.list_a(tool.options.zone, tool.options.fqdn)
+            if len(res) > 0:
+                for rec in res:
+                    print("%s (record id: %s)"%(rec[1], rec[0]))
+            else:
+                print("No A records found")
+        elif (tool.object == "a") and (tool.command == "add"):
+            if tool.add_a(tool.options.zone, tool.options.fqdn, tool.arguments[0]) and tool.options.verbose:
+                print("OK")
+        elif (tool.object == "a") and (tool.command == "del"):
+            if tool.del_a(tool.options.zone, tool.options.fqdn, tool.arguments[0]) and tool.options.verbose:
+                print("OK")
+        else:
+            raise DynectException("Invalid arguments")
+    except DynectException, e:
+        print("ERROR: %s"%str(e))
