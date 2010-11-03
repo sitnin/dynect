@@ -31,6 +31,16 @@ This will produce output like this:
     190.161.49.7 (record id: 6493308)
     62.148.64.1 (record id: 6495858)
 
+### Possible object types and commands
+
+#### Object type: A (-o a)
+
+*   list -- list all A records for the node in zone
+*   add A.B.C.D -- add A records for the node
+*   del A.B.C.D -- delete A records from the node
+
+Add and delete commands finds record id by supplied ip-address.
+
 ## Contacts
 
 My email is g.sitnin@wwpass.com

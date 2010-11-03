@@ -29,7 +29,7 @@ Details are coming...
 
 __author__ = "Gregory Sitnin <g.sitnin@wwpass.com>"
 __copyright__ = "Copyright WWPASS Corporation, 2010"
-__version__ = "0.1"
+__version__ = "0.2"
 
 import httplib
 import urllib
@@ -147,7 +147,7 @@ class Dynect(object):
 
 class DynTool(object):
     def __init__(self):
-        parser = OptionParser(usage="\n%prog [options] ARGS\n%prog --version\n%prog --help", version="%prog v0.1")
+        parser = OptionParser(usage="\n%prog [options] ARGS\n%prog --version\n%prog --help", version="%prog "+__version__)
         parser.add_option("-c", "--customer", dest="customer", help="Dynect customer name")
         parser.add_option("-u", "--username", dest="user", help="Dynect user name")
         parser.add_option("-p", "--password", dest="password", help="Dynect user password")
