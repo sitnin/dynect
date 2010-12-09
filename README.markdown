@@ -39,8 +39,11 @@ This will produce output like this:
 *   add A.B.C.D -- add A records for the node
 *   del A.B.C.D -- delete A records from the node
 
+<<<<<<< HEAD
 Add and delete commands finds record id by supplied ip-address.
 
+=======
+>>>>>>> b3f199b998823cb939724ace20af7697f355e38d
 ## Contacts
 
 My email is g.sitnin@wwpass.com
