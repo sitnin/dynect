@@ -43,7 +43,7 @@ Add and delete commands finds record id by supplied ip-address.
 
 ## Contacts
 
-My email is g.sitnin@wwpass.com
+My email is sitnin@gmail.com
 
 Details are coming...
 Maybe...
